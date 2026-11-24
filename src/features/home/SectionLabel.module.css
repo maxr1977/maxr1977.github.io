@@ -1,0 +1,38 @@
+.label {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.label p {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding-block-end: var(--space-5);
+  border-block-end: 1px solid var(--color-line);
+}
+
+.aside {
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.rail::after {
+  display: block;
+  width: 2.5rem;
+  height: 1px;
+  margin-block-start: var(--space-5);
+  background: var(--color-line);
+  content: '';
+}

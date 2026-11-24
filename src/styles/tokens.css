@@ -1,0 +1,76 @@
+:root {
+  color-scheme: light;
+
+  /* Digital & Creative — all color decisions live here. */
+  --color-navy: #121b2b;
+  --color-navy-2: #1b2639;
+  --color-ink: #172437;
+  --color-text: #344254;
+  --color-muted: #626e7e;
+  --color-surface: #f7f8f9;
+  --color-paper: #ffffff;
+  --color-line: #dbe0e6;
+  --color-line-dark: #364155;
+  --color-blue: #708cfb;
+  --color-blue-strong: #516fec;
+  --color-link: #405bc9;
+  --color-heading-accent: #63769a;
+  --color-mint: #b9e4d6;
+  --color-warm: #f1ad84;
+  --color-text-on-dark: #c1cad8;
+  --color-muted-on-dark: #a9b8cc;
+  --color-focus-on-dark: #b4c4ff;
+  --color-focus: var(--color-link);
+  --color-web-surface: #dce4fc;
+  --color-it-surface: #e0ece7;
+  --color-creative-surface: #f4e5da;
+  --color-card-text: #46556a;
+  --color-proof-surface: #e9edf3;
+  --color-art-top: #2a3c56;
+  --color-art-bottom: #1a273d;
+  --color-art-line: #546780;
+  --color-art-light: #e1e8f0;
+  --color-availability: #93d9ba;
+  --color-dark-border: rgb(193 202 216 / 20%);
+  --color-dark-glass: rgb(255 255 255 / 3%);
+  --color-tag-border: rgb(23 36 55 / 18%);
+  --shadow-card: 0 20px 48px rgb(12 23 45 / 9%);
+  --shadow-art: 0 24px 70px rgb(5 12 24 / 22%);
+
+  --font-family: 'Segoe UI', Arial, sans-serif;
+  --font-size-body: 1rem;
+  --font-size-small: 0.875rem;
+  --line-height-body: 1.75;
+  --content-width: 76.25rem;
+  --page-gutter: clamp(1.25rem, 3.5vw, 2.75rem);
+  --header-height: 4.75rem;
+  --section-space: clamp(4rem, 8vw, 7.5rem);
+  --target-size: 2.75rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --radius-small: 0.25rem;
+  --duration-fast: 180ms;
+  --duration-normal: 250ms;
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --header-height: 5.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+  }
+}

@@ -1,0 +1,45 @@
+.link {
+  display: inline-flex;
+  min-height: 3.25rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-small);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: background-color var(--duration-normal), border-color var(--duration-normal),
+    transform var(--duration-normal);
+}
+
+.link svg {
+  flex: 0 0 1.125rem;
+}
+
+.primary {
+  background: var(--color-blue);
+  color: var(--color-navy);
+}
+
+.primary:hover {
+  background: var(--color-focus-on-dark);
+}
+
+.ghost {
+  border-color: var(--color-art-line);
+  color: var(--color-paper);
+}
+
+.ghost:hover {
+  border-color: var(--color-text-on-dark);
+  background: var(--color-navy-2);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .link:hover {
+    transform: translateY(-2px);
+  }
+}

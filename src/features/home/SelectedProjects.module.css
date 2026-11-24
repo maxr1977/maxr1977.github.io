@@ -1,0 +1,33 @@
+.section {
+  padding-block: var(--section-space);
+  background: var(--color-paper);
+}
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-6);
+  margin-block: var(--space-8);
+}
+.heading h2 {
+  margin: 0 0 var(--space-5);
+  color: var(--color-ink);
+  font-size: clamp(2rem, 4.3vw, 3.625rem);
+  letter-spacing: -0.035em;
+  line-height: 1.17;
+}
+.heading p {
+  max-width: 58ch;
+  margin: 0;
+}
+.heading a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-size);
+  font-weight: 650;
+}
+.heading svg {
+  width: 1.125rem;
+}

@@ -1,0 +1,53 @@
+node_modules/
+dist/
+.npm-cache/
+.sites-runtime/
+.qa/
+.release/
+.playwright-mcp/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+*.log
+*.local
+
+# Secrets and private source materials never belong in the repository.
+.env
+.env.*
+!.env.example
+private/
+
+# Local editor and operating-system state.
+.idea/
+.vs/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Project planning and internal documentation
+PROJECT_BRIEF.md
+DESIGN.md
+CONTENT.md
+ROADMAP.md
+AGENTS.md
+
+# Design references and prototypes
+reference/
+
+# Private documents and original materials
+private/
+
+# Photoshop source files
+*.psd
+*.psb
+
+# Local backup files
+*.bak
+*.tmp
+
+# Local credentials and diagnostic exports
+.npmrc
+*.pem
+*.key
+reports/
