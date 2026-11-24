@@ -89,6 +89,9 @@
 
 .comparison {
   min-width: 0;
+  width: 100%;
+  max-width: 40rem;
+  margin-inline: auto;
 }
 
 .controlLabel {
@@ -103,10 +106,6 @@
   position: relative;
   min-width: 0;
   width: 100%;
-  max-width: calc(
-    var(--comparison-block-limit, min(70svh, 42rem)) *
-      var(--comparison-aspect-ratio)
-  );
   margin-inline: auto;
   overflow: clip;
   border: 1px solid var(--color-line-dark);
@@ -136,27 +135,19 @@
   clip-path: inset(0 calc(100% - var(--comparison-position)) 0 0);
 }
 
-.badge {
-  position: absolute;
-  z-index: 2;
-  inset-block-start: var(--space-3);
-  max-width: calc(50% - var(--space-4));
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-art-line);
-  border-radius: var(--radius-small);
-  background: var(--color-navy);
-  color: var(--color-paper);
-  font-size: 0.75rem;
+.imageLabels {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-block-end: var(--space-2);
+  color: var(--color-ink);
+  font-size: var(--font-size-small);
+  font-weight: 650;
   line-height: 1.4;
-  pointer-events: none;
+  hyphens: none;
 }
-
-.beforeBadge {
-  inset-inline-start: var(--space-3);
-}
-
-.afterBadge {
-  inset-inline-end: var(--space-3);
+.imageLabels span:last-child {
+  text-align: end;
 }
 
 .divider {
@@ -195,9 +186,8 @@
 }
 
 .rangeRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  display: grid;
+  gap: 0;
   margin-block-start: var(--space-3);
 }
 
@@ -209,6 +199,7 @@
   margin: 0;
   accent-color: var(--color-link);
   cursor: ew-resize;
+  grid-row: 2;
 }
 
 .range:disabled {
@@ -216,6 +207,8 @@
 }
 
 .value {
+  grid-row: 1;
+  justify-self: end;
   min-width: 4.5rem;
   color: var(--color-text);
   font-size: var(--font-size-small);
@@ -308,9 +301,6 @@
   min-width: 0;
 }
 
-.featured {
-  --comparison-block-limit: max(8rem, min(55svh, calc(100svh - 24rem), 38rem));
-}
 .stageSlot {
   min-width: 0;
 }
@@ -333,34 +323,15 @@
   font-size: 0.8125rem;
   line-height: 1.4;
 }
-.comparisonDialog [data-modal-content] {
-  overflow: hidden;
-}
 .expanded {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  height: 100%;
+  min-width: 0;
 }
 .expanded .modeButtons {
   flex: none;
   margin-block: 0 var(--space-3);
 }
 .expanded .comparison {
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto auto;
-  min-height: 0;
-  flex: 1;
-}
-.expanded .stageSlot {
-  container-type: size;
-  min-height: 0;
-  display: grid;
-  place-items: center;
-}
-.expanded .stage {
-  width: min(100cqw, calc(100cqh * var(--comparison-aspect-ratio)));
-  max-width: none;
+  max-width: 48rem;
 }
 .expanded .controlLabel {
   position: absolute;
@@ -420,13 +391,16 @@
 }
 
 @media (min-width: 64rem) {
-  .featured .showcase {
-    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
-    align-items: start;
-    gap: var(--space-10);
-  }
-
   .individualGrid[data-count='3'] {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Two columns need room for both a useful portrait and readable method text. */
+@media (min-width: 72rem) {
+  .featured .showcase {
+    grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.85fr);
+    align-items: start;
+    gap: var(--space-10);
   }
 }

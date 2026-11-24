@@ -604,6 +604,14 @@ test('real photo case has correct pairs, attribution, full images and no crop/de
   )?.[0]
   assert.ok(manualStage)
   assert.ok(
+    !manualStage.includes('Original') && !manualStage.includes('Photoshop'),
+    'Source labels must stay outside the photograph'
+  )
+  assert.match(
+    html.slice(0, html.indexOf(manualStage)),
+    /<span>Original<\/span><span>Photoshop<\/span>/
+  )
+  assert.ok(
     manualStage.includes('original.jpg') &&
       manualStage.includes('photoshop.jpg')
   )

@@ -1,5 +1,201 @@
 # Maksym Rechyn — GitHub Pages release
 
+## Текущий порядок обновления: два независимых репозитория
+
+Единственный источник разработки —
+`C:\Projekt\Portfolio\maksym-portfolio\maksym-portfolio-starter`.
+Его приватную Git-историю **никогда не отправлять** в публичный репозиторий.
+Вложенный `.release/public-source-approved` уже имеет собственную публичную
+историю и origin `maxr1977/maxr1977.github.io`. Это отдельный репозиторий,
+а не ветка приватного. Не перезаписывайте его новым экспортом и не удаляйте.
+Первичная инициализация завершена; повторный `git init` для существующего
+публичного репозитория запрещён. Команды первого push убраны из этой инструкции.
+
+Рекомендуемый постоянный публичный checkout:
+`C:\Projekt\Portfolio\maksym-portfolio-public`. Сейчас подготовка не переносит
+и не изменяет вложенный checkout. Если каталог ещё отсутствует, владелец может
+выполнить следующий блок **после review**. Если существует — сначала изучить
+`git status`, историю и origin, ничего не перезаписывать.
+
+```powershell
+if (Test-Path -LiteralPath C:\Projekt\Portfolio\maksym-portfolio-public) {
+  throw 'Каталог уже существует: сначала проверьте его содержимое и Git.'
+}
+git clone https://github.com/maxr1977/maxr1977.github.io.git C:\Projekt\Portfolio\maksym-portfolio-public
+if ($LASTEXITCODE -ne 0) { throw 'Clone failed.' }
+```
+
+Обычный clone сохраняет существующую удалённую историю. Не копируйте `.git`
+вручную, не выполняйте `git init` заново, не используйте force-push или зеркальное
+удаление (`robocopy /MIR`). Старый вложенный checkout пока оставить на месте.
+
+### 1. Изменения и проверки — в приватном проекте
+
+```powershell
+Set-Location C:\Projekt\Portfolio\maksym-portfolio\maksym-portfolio-starter
+npm.cmd run dev
+# После проверки в браузере остановите сервер Ctrl+C.
+npm.cmd run typecheck
+if ($LASTEXITCODE -ne 0) { throw 'Typecheck failed.' }
+npm.cmd run lint
+if ($LASTEXITCODE -ne 0) { throw 'Lint failed.' }
+npm.cmd test
+if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }
+npm.cmd run build
+if ($LASTEXITCODE -ne 0) { throw 'Build failed.' }
+npm.cmd run check:release
+if ($LASTEXITCODE -ne 0) { throw 'Release gate failed.' }
+```
+
+Зависимости устанавливаются через `npm.cmd ci`, если отсутствуют или менялись
+package/lock-файлы. Проверку форматирования выполняйте существующим Prettier,
+если он доступен; новый formatter как зависимость проекта не добавлялся.
+Приватный `audit:repository` продолжает обнаруживать исторические черновики —
+это причина сохранять разделение, а не обходить аудит публичной копии.
+
+### 2. Новый временный экспорт — в приватном проекте
+
+Каждый раз выбирайте **новое имя** внутри `.release`. Например, для этой правки:
+
+```powershell
+Set-Location C:\Projekt\Portfolio\maksym-portfolio\maksym-portfolio-starter
+npm.cmd run prepare:public -- --out .release/photo-responsive-review
+if ($LASTEXITCODE -ne 0) { throw 'Export failed: use a fresh path, never overwrite a checkout.' }
+Set-Location .release/photo-responsive-review
+node --experimental-strip-types scripts/audit-repository.mjs --snapshot
+if ($LASTEXITCODE -ne 0) { throw 'Export audit failed.' }
+npm.cmd run check:release
+if ($LASTEXITCODE -ne 0) { throw 'Export release gate failed.' }
+```
+
+Не запускайте генератор внутри публичного checkout. Экспорт отказывается
+перезаписывать существующие каталоги, создавать экспорт внутри Git-checkout
+и проходить через симлинки/junctions. Готовый экспорт проверяет только файлы,
+а не наследует старую историю. Существующий экспорт после любых изменений
+исходников устаревает; создайте следующий с новым именем.
+
+### 3. Проверка назначения и dry-run
+
+Перед синхронизацией нужен чистый `main`, совпадающий с полученным `origin/main`.
+Сначала убедитесь, что в публичном checkout нет собственных незавершённых правок:
+
+```powershell
+Set-Location C:\Projekt\Portfolio\maksym-portfolio-public
+git status --short
+git remote -v
+# Если status не пустой или origin иной — остановитесь и разберите изменения.
+git fetch origin
+if ($LASTEXITCODE -ne 0) { throw 'Fetch failed.' }
+git switch main
+if ($LASTEXITCODE -ne 0) { throw 'Branch switch failed.' }
+git pull --ff-only origin main
+if ($LASTEXITCODE -ne 0) { throw 'Fast-forward failed; inspect divergence without reset/force.' }
+
+Set-Location C:\Projekt\Portfolio\maksym-portfolio\maksym-portfolio-starter
+npm.cmd run sync:public -- --from .release/photo-responsive-review --to C:/Projekt/Portfolio/maksym-portfolio-public
+if ($LASTEXITCODE -ne 0) { throw 'Dry-run failed.' }
+```
+
+Без `--apply` команда ничего не меняет. Она выводит список added/modified/deleted;
+проверьте каждый путь. Она требует отдельный checkout вне приватного проекта,
+правильные fetch/push URL origin, чистый main и совпадение HEAD с origin/main.
+Проверяются актуальность всех файлов экспорта относительно источника,
+строгий allowlist, отсутствие лишних файлов, симлинков и коллизий, release gates
+и публичная история. Сетевая проверка не выполняется: `git fetch` выше обязателен.
+Неизвестный tracked-путь блокирует операцию для ручного review.
+
+### 4. Применение — только после одобрения dry-run
+
+```powershell
+Set-Location C:\Projekt\Portfolio\maksym-portfolio\maksym-portfolio-starter
+npm.cmd run sync:public -- --from .release/photo-responsive-review --to C:/Projekt/Portfolio/maksym-portfolio-public --apply
+if ($LASTEXITCODE -ne 0) { throw 'Sync failed; inspect the report before continuing.' }
+```
+
+Применение затрагивает только разрешённые файлы. Устаревшие tracked-файлы из
+allowlist удаляются, чтобы они не оставались опубликованными. Неизвестные файлы
+не удаляются автоматически. `.git`, приватные документы, QA, `.env`, зависимости
+и build-результаты исключены. После синхронизации повторяются аудит и gate;
+при обычной ошибке изменённые файлы восстанавливаются. Это не транзакция,
+устойчивая к отключению питания: при прерывании проверьте diff, не делайте push.
+Во время операции не запускайте другие Git-команды или редактирование checkout.
+
+### 5. Review, публичный commit и push — вручную владельцем
+
+```powershell
+Set-Location C:\Projekt\Portfolio\maksym-portfolio-public
+npm.cmd ci
+if ($LASTEXITCODE -ne 0) { throw 'Install failed.' }
+npm.cmd run typecheck
+if ($LASTEXITCODE -ne 0) { throw 'Typecheck failed.' }
+npm.cmd run lint
+if ($LASTEXITCODE -ne 0) { throw 'Lint failed.' }
+npm.cmd test
+if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }
+npm.cmd audit --audit-level=moderate
+if ($LASTEXITCODE -ne 0) { throw 'Dependency audit failed.' }
+npm.cmd run build
+if ($LASTEXITCODE -ne 0) { throw 'Build failed.' }
+npm.cmd run audit:repository
+if ($LASTEXITCODE -ne 0) { throw 'Public source/history audit failed.' }
+npm.cmd run check:release
+if ($LASTEXITCODE -ne 0) { throw 'Release gate failed.' }
+git diff --stat
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Diff check failed.' }
+git diff
+# Остановитесь для личного review файлов, удалений и изображений.
+# Следующие команды выполнять только после утверждения diff.
+git add --all
+git diff --cached --stat
+git diff --cached --check
+if ($LASTEXITCODE -ne 0) { throw 'Staged diff failed.' }
+git commit -m "Fix responsive photo comparison layout"
+if ($LASTEXITCODE -ne 0) { throw 'Commit failed.' }
+npm.cmd run audit:repository
+if ($LASTEXITCODE -ne 0) { throw 'History audit failed. Do not push.' }
+git push origin main
+if ($LASTEXITCODE -ne 0) { throw 'Push failed. Do not force-push.' }
+```
+
+**Push в main автоматически запускает существующий workflow**, а не только
+валидацию: после успешных gates он публикует `dist` через GitHub Pages.
+`workflow_dispatch` остаётся дополнительным ручным запуском. Перед push владелец
+должен одобрить и изменения, и публикацию. Вкладка Actions → Validate and deploy
+GitHub Pages: дождаться обоих успешных jobs, проверить environment URL.
+Затем проверить https://maxr1977.github.io/ и прямые маршруты/reload,
+фильтры, изображения, обе пары сравнения, dialog/Escape, мобильную навигацию,
+юридические ссылки, консоль и фактические внешние запросы. Base `/` и статические
+directory index маршруты сохранены.
+
+### Последующие изменения
+
+CSS, новые кейсы, медиа и зависимости изменяются сначала в приватном проекте;
+затем тот же validate → новый export → audit → dry-run → approval → apply →
+public diff → commit → push. У новых проектов и медиа отдельно проверяются
+достоверность, статус published и разрешение публикации. Видео, внешние embeds,
+хостинг видео, аналитика, шрифты и иные сторонние ресурсы требуют нового
+privacy/publication audit. Экспорт видео намеренно блокируется текущим
+`publicRecords` до реализации и review соответствующего экспорта.
+Для правок юридических текстов/контактов требуется новое личное одобрение и
+актуализация записи; старое одобрение не переносится автоматически.
+Публичный checkout не становится вторым источником разработки.
+
+### Ручная проверка настоящего browser zoom
+
+Playwright проверяет CSS viewport, а не настоящий browser zoom. Для ручной
+проверки запустите `npm.cmd run dev` в приватном проекте и откройте
+`http://127.0.0.1:5173/projekte/photo-restoration` в обычном окне Chrome.
+Сначала Ctrl+0; затем через меню Chrome → Масштаб установите последовательно
+100%, 125%, 150% и 200%. Не используйте процент масштаба предпросмотра DevTools
+как замену. Повторите в обычном desktop-окне и невысоком окне ноутбука.
+На каждом шаге проверьте подписи вне фото, естественную высоту и отсутствие
+горизонтальной прокрутки, обе пары, drag, Tab/стрелки/Home/End, увеличенный dialog,
+его вертикальную прокрутку, Escape и возврат фокуса. Завершите Ctrl+0.
+Физическое touch-устройство и screen reader проверяются отдельно.
+
+Ниже сохранены технические сведения первоначального релиза.
+
 Vite + React + TypeScript. Target repository: **maxr1977/maxr1977.github.io**.
 Expected URL after a successful, approved deployment: **https://maxr1977.github.io/**.
 This URL is not evidence of an existing deployment.
@@ -128,7 +324,9 @@ records through the existing publication whitelist, and substitutes this short
 public README for private development history. It does not initialize Git, commit,
 upload or deploy. Existing output directories are never overwritten.
 
-The approved release snapshot is **`.release/public-source-approved`**. The older
+At the initial release, the approved snapshot was **`.release/public-source-approved`**;
+it is now an independent Git checkout and must never be regenerated or overwritten.
+The older
 `.release/public-source` and `.release/public-source-final` copies are stale and
 must not be published. This approved snapshot was regenerated through the existing
 allowlist, without any `.git`. Never copy the original development history.
@@ -146,47 +344,10 @@ patterns, not a guarantee that every secret or copyright issue has been detected
 Do not include personal PDFs, credentials, unreviewed image sources or proprietary
 repositories. Keep the original private history locally.
 
-## First public push — owner actions only, after all blockers are resolved
+## Existing public history
 
-1. On github.com, sign in as **maxr1977** and create an empty **Public** repository
-   named **maxr1977.github.io**. Do not initialize a README, license or .gitignore.
-   If that repository already exists, inspect it before doing anything; do not
-   force-push or replace existing work.
-2. Use only the approved snapshot path below. If its source has changed since
-   validation, review approvals, rerun validation and regenerate into a fresh path.
-3. In the reviewed snapshot directory only (not the private working repository):
-
-```powershell
-Set-Location C:\Projekt\Portfolio\maksym-portfolio\maksym-portfolio-starter\.release\public-source-approved
-npm.cmd run check:release
-if ($LASTEXITCODE -ne 0) { throw 'Release is still blocked. Stop before Git initialization.' }
-node --experimental-strip-types scripts/audit-repository.mjs --snapshot
-if ($LASTEXITCODE -ne 0) { throw 'Public snapshot audit failed.' }
-git init -b main
-if ($LASTEXITCODE -ne 0) { throw 'Git initialization failed.' }
-git add .
-if ($LASTEXITCODE -ne 0) { throw 'Staging failed.' }
-git diff --cached --stat
-git diff --cached --check
-if ($LASTEXITCODE -ne 0) { throw 'Staged diff check failed.' }
-# Review staged content before committing. Use a reviewed Git author identity.
-git commit -m "Initial public portfolio release"
-if ($LASTEXITCODE -ne 0) { throw 'Commit failed.' }
-npm.cmd run audit:repository
-if ($LASTEXITCODE -ne 0) { throw 'Repository/history audit failed. Do not push.' }
-npm.cmd run check:release
-if ($LASTEXITCODE -ne 0) { throw 'Release gate failed. Do not push.' }
-git remote add origin https://github.com/maxr1977/maxr1977.github.io.git
-if ($LASTEXITCODE -ne 0) { throw 'Remote setup failed. Inspect existing configuration.' }
-git push -u origin main
-if ($LASTEXITCODE -ne 0) { throw 'Push failed. Inspect the error; do not force-push.' }
-```
-
-If a fresh snapshot was generated at another path, substitute that exact path.
-Dependencies can be installed in the snapshot with `npm.cmd ci` before checking.
-Stop if audit or readiness fails. Use normal GitHub authentication; do not put a
-personal access token in the remote URL or source. Prefer a GitHub no-reply commit
-email if you do not want a personal author email in public history.
+The initial public repository already exists. Do not reinitialize it or repeat
+the initial-release commands. Use the reviewed update workflow above.
 
 ## Enable GitHub Pages — owner actions only
 
@@ -206,10 +367,10 @@ email if you do not want a personal author email in public history.
 
 ## Later updates
 
-Keep private planning in the local working project. Generate a new reviewed public
-snapshot and compare/copy its changed public files into the public checkout.
-Do not copy `.git`, QA folders or private registry records. Run checks, review the
-diff, commit and push to main manually. A successful workflow updates Pages.
+Use the Russian update procedure at the start of this document: fresh export,
+audit, dry-run and approved explicit synchronization into the separate checkout.
+Do not copy `.git`, QA folders or private registry records. Review the public diff,
+commit and push to main manually. A successful workflow updates Pages.
 Never force-push to remove accidentally exposed secrets: revoke affected secrets
 and handle history cleanup separately. A private source repository is not deployed.
 

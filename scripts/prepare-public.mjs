@@ -4,7 +4,8 @@ import {
   writeFile,
   copyFile,
   realpath,
-  stat
+  stat,
+  lstat
 } from 'node:fs/promises'
 import { resolve, dirname, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -17,6 +18,29 @@ export async function preparePublic(root, output, records = projects) {
   output = resolve(root, output)
   if (!output.startsWith(releaseRoot + sep))
     throw new Error('Export must stay inside the workspace .release directory.')
+  // Never create exports within a checkout or through a junction/symlink.
+  for (
+    let parent = dirname(output);
+    parent.startsWith(releaseRoot);
+    parent = dirname(parent)
+  ) {
+    try {
+      if (
+        (await lstat(parent)).isSymbolicLink() ||
+        (await realpath(parent)) !== parent
+      )
+        throw new Error('Export ancestor must not be a symlink.')
+      try {
+        await lstat(resolve(parent, '.git'))
+        throw new Error('Export must not be created inside a Git checkout.')
+      } catch (error) {
+        if (error.code !== 'ENOENT') throw error
+      }
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error
+    }
+    if (parent === releaseRoot) break
+  }
   try {
     await stat(output)
     throw new Error(

@@ -123,6 +123,10 @@ function ReadyComparison({
       ) : (
         <>
           <div className={styles.stageSlot}>
+            <div className={styles.imageLabels}>
+              <span>{beforeLabel}</span>
+              <span>{afterLabel}</span>
+            </div>
             <div
               className={styles.stage}
               style={frameStyle}
@@ -157,12 +161,6 @@ function ReadyComparison({
                 }
                 onError={() => setFailed(true)}
               />
-              <span className={`${styles.badge} ${styles.beforeBadge}`}>
-                {beforeLabel}
-              </span>
-              <span className={`${styles.badge} ${styles.afterBadge}`}>
-                {afterLabel}
-              </span>
               <span className={styles.divider}>
                 <span className={styles.handle}>↔</span>
               </span>

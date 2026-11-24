@@ -15,7 +15,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "check:release": "node --experimental-strip-types scripts/check-release.mjs",
     "audit:repository": "node --experimental-strip-types scripts/audit-repository.mjs",
-    "prepare:public": "node --experimental-strip-types scripts/prepare-public.mjs"
+    "prepare:public": "node --experimental-strip-types scripts/prepare-public.mjs",
+    "sync:public": "node --experimental-strip-types scripts/sync-public.mjs"
   },
   "dependencies": {
     "react": "19.3.1",
